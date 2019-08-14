@@ -1,0 +1,82 @@
+% FIXED!
+\section{Preliminaries}
+\label{s:prelim}
+
+\parhead{Notation.}
+\label{s:prelim:notation}
+Let $\lambda$ denote our security parameter.
+Let $\Hb$ denote a collision-resistant hash function (CRHF) with $2\lambda$-bits output.
+We use multiplicative notation for all algebraic groups in this paper.
+Let $\Fp$ denote the finite field ``in the exponent'' associated with a group $\Group$ of prime order $p$.
+Let $\poly(\cdot)$ denote any function upper-bounded by some univariate polynomial.
+Let $\log{x}$ be shorthand for $\log_2{x}$.
+Let $[n] = \{1,2,\dots,n\}$ and $[i,j] = \{i,i+1,\dots,j-1,j\}$.
+% --- begin multiline ---
+Let $\mathcal{PP}_q(s) = \langle g^s, g^{s^2}, \dots, g^{s^q}\rangle$ denote $q$-SDH public parameters.
+and $\mathcal{PP}_q(s,\tau) = \langle g^s, g^{s^2}, \dots, g^{s^q}, g^{\tau s}, g^{\tau s^2}, \dots, g^{\tau s^q}\rangle$ denote $q$-PKE public parameters (see \cref{app:assumptions}).
+% --- end multiline ---
+Let $\varepsilon$ denote the empty string.
+
+\parhead{Cryptographic assumptions.}
+\label{s:prelim:cryptographic-assumptions}
+Our work relies on the use of \emph{pairings} or \emph{bilinear maps}~\cite{mov-attack,pairing}.
+Recall that a bilinear map $e(\cdot,\cdot)$ has useful algebraic properties: $e(g^a, g^b) = e(g^a, g)^b = e(g, g^b)^a = e(g, g)^{ab}$. 
+To simplify exposition, throughout the paper we assume symmetric (Type~I) pairings (although our implementation in~\cref{s:eval} uses asymmetric pairings).
+Our assumptions can be re-stated in the setting of (the more efficient) asymmetric (Type~II and~III) pairings in a straightforward manner. 
+Our AAS and AAD constructions from \cref{s:aas,s:aad} are provably secure under the $q$-SBDH~\cite{qsbdh} and $q$-PKE assumptions~\cite{groth10}, which we define in~\cref{app:assumptions}.
+
+The $q$-PKE assumption is non-standard and often referred to as ``non-falsifiable'' in the literature.
+This terminology can be confusing, since previous, so-called ``non-falsifiable'' assumptions have been falsified~\cite{kea-falsified}.
+Naor explored the nuance of these types of assumptions and proposed thinking of them as ``not efficiently falsifiable''~\cite{Naor2003OnCryptographic}.
+For example, to falsify $q$-PKE one must find an adversary and mathematically prove that \textit{all} extractors fail for it.
+
+\subsection{Bilinear Accumulators}
+\label{s:prelim:polycommit}
+A \textit{bilinear accumulator}~\cite{acc-bilinear,acc-bilinear-nonmemb} is a cryptographic commitment to a set $T = \{e_1, e_2, \dots, e_n\}$, referred to as the \textit{accumulated set}. 
+
+\parhead{Committing to a set.}
+Let $\charpoly_T(x) = (x-e_1)(x-e_2)\cdots(x-e_n)$ denote the \textit{characteristic polynomial} of $T$ and $s$ denote a trapdoor that nobody knows.
+The accumulator $\mathsf{acc}(T)$ of $T$ is computed as $\mathsf{acc}(T) = g^{\charpoly_T(s)} = g^{(s-e_1)(s-e_2)\cdots(s-e_n)}$.
+The trapdoor $s$ is generated during a \textit{trusted setup phase} after which nobody knows $s$.
+Specifically, given an upper-bound $q$ on the set size, this phase returns $q$-SDH public parameters $\mathcal{PP}_q(s) = \langle g^s, g^{s^2},\allowbreak \dots, g^{s^q}\rangle$.
+This can be done via MPC protocols~\cite{zcash-mpc1,zcash-mpc2,KiayiasOksuzTang2015} as detailed in \cref{s:discussion}.
+Given coefficients $c_0, c_1, \dots, c_{n}$ of $\charpoly_T(\cdot)$ where $n \le q$, the accumulator is computed \textit{without knowing} $s$ as follows:
+\begin{align*}
+\small
+\mathsf{acc}(T)
+    &= g^{c_0} (g^s)^{c_1} (g^{s^2})^{c_2} \cdots (g^{s^{n}})^{c_{n}}
+    = g^{c_0 + c_1 s + c_2 s^2 \cdots c_{n} s^{n}}
+    = g^{\charpoly_T(s)}
+\end{align*}
+In other words, the server computes a \textit{polynomial commitment}~\cite{acc-bilinear,polycommit} to the characteristic polynomial of $T$.
+Since the accumulator only supports elements from $\Fp$, we assume a function $\Hp: \mathcal{D}\rightarrow \Fp$ that maps elements to be accumulated from any domain $\mathcal{D}$ to values in $\Fp$.
+If $|\mathcal{D}|>|\Fp|$, then $\Hp$ can be a CRHF.
+
+\parhead{Membership proofs.}
+A \textit{prover} who has $T$ can convince a \textit{verifier} who has $\mathsf{acc}(T)$ that an \textit{element} $e_i$ is in the set $T$.
+The prover simply convinces the verifier that $(x-e_i) \mathrel| \charpoly_T(x)$ by presenting a commitment $\pi=g^{q(s)}$ to a quotient polynomial $q(\cdot)$ such that $\charpoly_T(x) = (x-e_i)q(x)$.
+Using a bilinear map, the verifier checks the property above holds at $x=s$, which is secure under $q$-SDH~\cite{polycommit}:
+\begin{align*}
+e(g, \mathsf{acc}(T)) \stackrel{?}{=} e(\pi, g^s / g^{e_i}) \Leftrightarrow
+e(g, g)^{\charpoly_T(s)} \stackrel{?}{=} e(g,g)^{q(s)(s-e_i)}
+\end{align*}
+
+\parhead{Subset and disjointness proofs.}
+To prove that $A\subseteq B$, the prover shows that $\charpoly_A(x) \mathrel| \charpoly_{B}(x)$.
+Specifically, the prover presents a commitment $\pi=g^{q(s)}$ of a quotient polynomial $q(\cdot)$ such that $\charpoly_B(x) = q(x)\charpoly_A(x)$.
+The verifier checks that $e(g, \mathsf{acc}(B)) = e(\pi, \mathsf{acc}(A))$.
+
+To prove that $A\cap B = \varnothing$, the prover uses the Extended Euclidean Algorithm (EEA)~\cite{moderncomputeralgebra-ch11} to compute \bezout coefficients $y(\cdot)$ and $z(\cdot)$ such that $y(x)\charpoly_A(x) + z(x)\charpoly_B(x) = 1$.
+The proof consists of commitments to the \bezout coefficients $\gamma = g^{y(s)}$ and $\zeta = g^{z(s)}$.
+The verifier checks that $e(\gamma,\mathsf{acc}(A))e(\zeta, \mathsf{acc}(B)) = e(g,g)$.
+By setting $B=\{e\}$, we get another type of non-membership proof for $e\notin A$.
+
+\parhead{Fast Fourier Transform (FFT).}
+% moderncomputeralgebra-ch8 talks about FFT in finite field (roots of unity to coefficients)
+% moderncomputeralgebra-ch10 talks about evaluation and interpolation using FFT at arbitrary points: x_i, f(x_i)
+% moderncomputeralgebra-ch11 talks about fast Euclidean Algorithm (Theorem 11.10)
+% Aho, Ullman "The Design and Analysis of Computer Algorithms" book says in Section 8.3 "Polynomial multiplication and divison", Theorem 8.7 that multiplication and division of any polynomial of degree n take the same time.
+We use FFT~\cite{moderncomputeralgebra-ch8} to speed up polynomial multiplication and division.
+For polynomials of degree-bound $n$, we divide and multiply them in $O(n\log{n})$ field operations~\cite{preparata-fft-ff}.
+We interpolate a polynomial from its $n$ roots in $\fftinterpol$ field operations~\cite{moderncomputeralgebra-ch10}.
+We compute \bezout coefficients for two polynomials of degree-bound $n$ using the Extended Euclidean Algorithm (EEA) in $O(n\log^2{n})$ field operations~\cite{moderncomputeralgebra-ch11}.

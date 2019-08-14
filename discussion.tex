@@ -1,0 +1,136 @@
+% FIXED
+\section{Discussion}
+\label{s:discussion}
+\label{s:aas:rsa}
+
+\parhead{Privacy via VRFs.}
+% Tree-based transparency logs like CONIKS provide some notion of privacy via the use of \textit{verifiable random functions (VRFs)}.
+When a user's identity (e.g., email address) is hashed to determine a path in the tree, the existence of the path leaks that the user is registered.
+To avoid this, CONIKS proposed using a \textit{verifiable random function (VRF)}~\cite{coniks,vrf} to map users to paths in the tree in a private but verifiable manner.
+We note that our construction is compatible with VRFs as well and can provide the same guarantees.
+For fairness, our comparison to CONIKS from \cref{s:eval:worth-it} assumes CONIKS does not use VRFs.
+
+\parhead{Constant-sized digests.}
+Digests in our constructions are $O(\log{n})$-sized where $n$ is the size of the set (or dictionary).
+We can make the digest constant-sized by concatenating and hashing all Merkle roots.
+Then, we can include the Merkle roots as part of our append-only and lookup proofs, without increasing our asymptotic costs.
+
+\parhead{Large, bounded public parameters.}
+Our bilinear-based constructions from~\cref{s:aas:construction,s:aad} are bounded: they support at most $N$ appends (given $q \approx 4\lambda N$ public parameters).
+One way to get an unbounded construction might be to use RSA accumulators as explained later in this section.
+Another way is to simply start a new data structure, when the old one gets ``full,'' similar to existing CT practices~\cite{Lynch2018}.
+The old digest could be committed in the new data structure to preserve the append-only property and fork consistency.
+(This will slightly increase our proof sizes for users who are not caught up with the latest digest.)
+% This can be achieved by ``rotating'' our data structure.
+% Assume the max size of the data structure is $2^{i+1} - 1$ (e.g., 1023 when $i=9$).
+% We can provably discard the biggest tree of size $2^i$ (e.g., 512) but keep all other trees of sizes $2^{i-1}, 2^{i-2}, \dots, 1$ (e.g., $256, 128, \dots 1$).
+% This creates room for another $2^i - 1$ appends (e.g., 511 appends).
+% The remaining append is used to commit the discarded tree so as to preserve the append-only property.
+
+\parhead{Trusted setup ceremony.}
+Previous work shows how to securely generate public parameters for QAP-based SNARKs~\cite{groth10,groth16} via MPC protocols~\cite{zcash-mpc1,zcash-mpc2}.
+For our AAD, we can leverage simplified versions of these protocols, since our public parameters are a ``subset'' of SNARK parameters.
+In particular, the protocol from~\cite{zcash-mpc2} makes participation very easy: it allows any number of players to join, participate and optionally drop out of the protocol.
+In contrast, the first protocol~\cite{zcash-mpc1} required a fixed, known-in-advance set of players.
+For our scheme, we believe tech companies with a demonstrated interest in transparency logs such as Google, Facebook and Apple can be players in the protocol.
+Furthermore, any other interested parties can be players too, thanks to protocols like~\cite{zcash-mpc2}.
+Finally, the practicality of these MPC protocols has already been demonstrated.
+In 2016, six participants used~\cite{zcash-mpc1} to generate public parameters for the Sprout version of the Zcash cryptocurrency~\cite{zcash}.
+Two years later, nearly 200 participants used~\cite{zcash-mpc2} to generate new public parameters for the newer Sapling version of Zcash.
+
+\parhead{RSA-based construction.}
+% Requirements for AAS/AAD accumulators:
+%  - Need subset proofs for append-only proofs in forest, for inclusion proofs and for frontier proofs. 
+%  - Need disjointness for frontier. 
+%  - Precomputing O(1) proofs like in RSA can also be helpful, both for the frontier and the forest.
+In principle, the bilinear accumulator in our constructions from \cref{s:aas:construction,s:aad} could be replaced with other accumulators that support subset proofs and disjointness proofs.
+Very recent work by Boneh et al~\cite{batch-rsa-acc} introduces new techniques for aggregating non-membership proofs in RSA accumulators.
+We believe their techniques can be used to create constant-sized disjointness proofs for RSA accumulators.
+This, in turn, can be used to build an alternative AAD as follows.
+
+Let us assume we have an RSA accumulator over $m$ elements.
+First, RSA accumulators allow precomputing all \textit{constant-sized} membership proofs in $O(m\log{m})$ time~\cite{blind-auditable-memb-proofs}.
+In contrast, our bilinear tree precomputes all logarithmic-sized proofs in $O(m\log^2{m})$ time.
+As a result, frontier proofs would be constant-sized rather than logarithmic-sized (i.e., the frontier tree corresponding to an RSA accumulator would be ``flat'').
+This decreases our AAD lookup proof size from $O(\log^2{n})$ to $O(\log{n})$.
+This asymptotic improvement should also translate to a concrete improvement in proof sizes.
+Our memory consumption should also decrease, since BFTs are no longer required.
+Second, RSA accumulators have constant-sized parameters rather than linear in dictionary size.
+This requires a simpler trusted setup ceremony~\cite{Frederiksen2018} and further saves memory on the server.
+However, unless RSA accumulators can be sped up, it would result in even slower appends, due to more expensive exponentiations.
+We leave it to future work to instantiate this RSA construction and prove it secure.
+
+% Third, RSA accumulators do not require trusted setup if instantiated with class groups~\cite{batch-rsa-acc,Lipmaa2012} rather than the integers ${}\bmod N$.
+% Although class groups are relatively new~\cite{Buchmann1988,Buchmann2001}, they have recently received increased interest~\cite{Damgaard2002,Pietrzak2018,Wesolowski2018,BonehBunzFisch2018,batch-rsa-acc,AltugChen2018}.
+
+\subsection{Constructions from argument systems}
+\label{s:snarks}%
+% NOTE: https://youtu.be/jEHOZbKSHNI?t=547
+%  - Aurora has O_k(N log N) prover time, O_k(log^2{N}) proof size and O_k(N) verification time, where k is a sec param
+%
+% NOTE: https://youtu.be/Y2HLlr3-MGA?t=1364
+%  - Aurora and Ligero have O(n) verification time: 
+%  - but STARK verifier complexity is wrong, since it should be polylog, I think (not linear)
+%
+% NOTE: Detailed table of complexities here: https://eprint.iacr.org/2019/099.pdf
+%  - Bulletproofs is O(n log n) verifier
+%  - says STARK verifier is polylog 
+%  - hyrax complexity 
+%
+% NOTE: https://github.com/elibensasson/libSTARK also says STARK verifier is polylog
+
+% d = depth of circuit
+% n = circuit size
+% Aurora:       transparent, PQ, \log^2{n} proof (220KB for n = 10^6), n\log{n} proving time, O(n) verification
+% Ligero:       like aurora, except \sqrt{n} proof (4 MB)
+% Hyrax:        like aurora, no PQ, except d\log{n} proof (50 KB)
+% Bulletproofs: like aurora, no PQ, except \log{n} proof (1.5KB)
+% STARK:        like aurora, except bigger constants for proof sizes (3.2 MB), verification time seems to be faster than SNARKs
+% Kalai's new:  verification cost and proof size linear in the circuit depth, linear CRS, still requires trusted setup
+%
+% Micali's CS proofs: "Finally, Micali raises similar goals to ours in his work on computationally sound (CS) proofs [Mic94]. His results are however obtained in the random oracle model. This allows him to achieve CS-proofs for the correctness of general time computations with a nearly linear time verifier, a prover whose runtime is polynomial in the time complexity of the computation, and a poly-log length non-interactive (“written down” rather than interactive) proof." from GKR15 paper
+%
+% Summary: too large proofs, too large verification time, and unclear (concrete) prover complexity, since some of these use PCPs (e.g., STARKs).
+%
+A promising direction for future work is to build AADs from generic argument systems~\cite{groth10,groth16,qsp,cs-proofs,aurora,bulletproofs,ligero,hyrax,stark}.
+Such AAD constructions would also require non-standard assumptions~\cite{GentryWichs2011}, possibly different than $q$-PKE (e.g., random oracle model, generic group model, etc.).
+Depending on the argument system, they might or might not require trusted setup and large public parameters.
+
+A static AAD can be built from an argument system (e.g., a SNARK~\cite{groth16,qsp}) as follows.
+The AAD maintains one unsorted tree $U$ and one sorted tree $S$ whose leaves are sorted by key. 
+The digest of the AAD consists of (1) the Merkle roots $(d(S), d(U))$ of $S$ and $U$ and (2) a SNARK \textit{proof of ``correspondence''} $\pi(S,U)$  between $S$ and $U$.
+This proof shows that $S$'s leaves are the same as $U$'s \textit{but in a different, sorted by key, order}.
+The SNARK circuit takes as input $U$'s leaves and $S$'s leaves, hashes them to obtain $d(U)$ and $d(S)$ and checks that $S$'s leaves are sorted by key.
+
+Now, given a digest $(d(S), d(U), \pi(S,U))$, lookups can be efficiently proven using Merkle proofs in the sorted tree $S$.
+The append-only property of two digests $(d(S), d(U), \pi(S,U))$ and $(d(S'), d(U')$, $\pi(S',U'))$ can be efficiently proven using a history tree append-only proof between $d(U)$ and $d(U')$. 
+This proves $U$ is a subset of $U'$ and, crucially, it also proves that $S$ is a subset of $S'$, since the SNARK $\pi(S,U)$ proves that $S$ ``corresponds'' to $U$ and $S'$ to $U'$.
+Unfortunately, updates would invalidate the SNARK proof and take time at least linear in the dictionary size to recompute it.
+However, we can apply the same Overmars technique~\cite{overmars,overmars-van-leeuwen} to make updates polylogarithmic time.
+(This would now require a family of circuits, one for each size $2^i$ of the trees.)
+
+This approach would result in much shorter lookup proofs while maintaining the same efficiency for append-only proofs, since state-of-the-art SNARKs have proofs consisting of just 3 group elements~\cite{groth16}.
+% $O(\log^2{n})$ lookup proofs, $O(\log{n})$ append-only proofs, $O(n)$ storage and, we estimate, $O(\log^3{n})$ append time if instantiated with state-of-the art SNARKs~\cite{groth16}.
+On the other hand, this approach might need more public parameters and could have slower appends.
+This is because, even with SNARK-friendly hashes (e.g., Ajtai-based~\cite{cycles-of-ec}, MiMC~\cite{mimc} or Jubjub~\cite{jubjub}), we estimate the number of multiplication gates for hashing trees of size $2^{20}$ to be in the billions.
+(And we are not accounting for the gates that verify tree $S$ is sorted.)
+In contrast, the degrees of the polynomials in our bilinear-based constructions are only in the hundreds of millions for dictionaries of size $2^{20}$.
+
+Nonetheless, optimizing such a solution would be interesting future work.
+For example, replacing SNARKs with STARKs~\cite{stark} would eliminate the large public parameters and the trusted setup, at the cost of larger append-only proofs.
+This may well be worth it if the proof size and prover time are not too large.
+Other argument systems such as Hyrax~\cite{hyrax}, Ligero~\cite{ligero} and Aurora~\cite{aurora} could achieve the same result.
+Unfortunately, Aurora and Ligero would increase the append-only proof verification time to linear, which could be prohibitive.
+Bulletproofs~\cite{bulletproofs} would further increase this verification time to quasilinear.
+Hyrax can make this time sublinear if the circuit is sufficiently parallel or has ``a wiring pattern [that] satisfies a technical regularity condition''~\cite{hyrax}.
+
+\parhead{Recursively-composable arguments.}
+Another interesting approach is to obtain AADs from recursively-composable SNARKs~\cite{cycles-of-ec,BitanskyCanettiChiesaTromer2013}.
+Such SNARKs could structure the verification of the append-only property recursively so that circuits need not operate on the entire dictionary, thus lowering overheads.
+We are aware of concurrent work that explores this approach, but unfortunately it is not peer-reviewed nor published in an online archive.
+While such an approach could be very promising, currently implemented systems operate at the 80-bit security level.
+This is because increasing the security of the elliptic curves used in recursive SNARK constructions is costly, since they have low embedding degree~\cite{cycles-of-ec}.
+% For BN254: \sqrt{p/q} = \sqrt{2^220/2^20} = 2^100
+In contrast, our implementation is 100-bit-secure after accounting for recent progress on computing discrete logs~\cite{MenezesSarkarSingh2017} and our $q$-SDH assumption with $q=2^{20}$~\cite{BonehBoyen2008}.
+% For BLS12-318: \sqrt{p/q} = \sqrt{2^256/2^20} = \sqrt{2^236} = 2^118
+We can increase this to 118 bits, with no loss in performance, by adopting 128-bit-secure BLS12-381 curves~\cite{bls12-381-switch}.

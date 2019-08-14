@@ -1,0 +1,24 @@
+% FIXED!
+\section{AAS Asymptotic Analysis}
+\label{s:aas:asymptotics}
+Suppose we have a \textit{worst-case} AAS with $n$ = $2^i - 1$ elements.
+
+\parhead{Space.}
+The space is dominated by the BFTs, which take up $O(\lambda n/2) + O(\lambda n/4) + \dots + O(1) = O(\lambda n)$ space.
+(BPTs only take up $O(n)$ space.)
+
+\parhead{Membership proof size.}
+Suppose an element $e$ is in some BPT of the AAS .
+To prove membership of $e$, we show a path from $e$'s leaf in the BPT to the BPT's root accumulator consisting of constant-sized subset proofs at every node.
+Since the largest BPT in the forest has height $\log{(n/2)}$, the membership proof is $O(\log{n})$-sized.
+
+\parhead{Non-membership proof size.}
+To prove non-membership of an element $e$, we show a frontier proof for a prefix of $e$ in every BFT in the forest.
+The largest BFT has $O(\lambda n)$ nodes so frontier proofs are $O(\log{(\lambda n)})$-sized.
+Because there are $O(\log{n})$ BFTs, all the frontier proofs are $O(\log{n}\log{(\lambda n)}) = O(\log^2{n})$-sized.
+
+\parhead{Append-only proof size.}
+Our append-only proof is $O(\log{n})$-sized.
+This is because, once we exclude common roots between the old and new digest, our proof consists of paths from each old root in the old forest up to a single new root in the new forest.
+Because the old roots are roots of adjacent trees in the old forest, there will be a single $O(\log{n})$-sized Merkle path connecting the old roots to the new root.
+In other words, our append-only proofs are similar to the append-only proofs from history trees~\cite{ht}.

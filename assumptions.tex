@@ -1,0 +1,39 @@
+% FIXED
+\section{Cryptographic Assumptions}
+\label{app:assumptions}
+
+\begin{definition}[Bilinear pairing parameters]
+    \label{d:bilinear-pairing-parameters}
+    Let $\mathcal{G}(\cdot)$ be a randomized polynomial algorithm with input a security parameter $\lambda$.
+    % -- begin multiline --
+    Then, $\langle \Group, \GT, p, g, e\rangle \leftarrow \mathcal{G}(1^\lambda)$ are called bilinear pairing parameters if
+    $\Group$ and $\GT$ are cyclic groups of prime order $p$ where discrete log is hard, 
+    $\Group = \langle g \rangle$ (i.e., $\Group$ has generator $g$)
+    and if $e$ is a bilinear map, $e : \Group\times \Group \rightarrow \GT$ such that $\GT = \langle e(g,g) \rangle$.
+    % -- end multiline --
+    %For $\lambda$ bits of security on computing discrete logs in $\Group$ and $\GT$, we require that $p > 2^{2\lambda}$.
+\end{definition}
+
+Our security analysis utilizes the following two cryptographic assumptions over elliptic curve groups with bilinear pairings.
+\begin{definition}[$q$-SBDH Assumption]
+\label{d:q-sbdh}
+Given security parameter $\lambda$, bilinear pairing parameters $\langle \Group, \GT, p, g, e\rangle \leftarrow \mathcal{G}(1^\lambda)$,
+public parameters  $\langle g, g^s, g^{s^2},\allowbreak \dots, g^{s^q}\rangle$ for some $q = \poly(\lambda)$ and some $s$ chosen uniformly at random from $\Zp^*$, no probabilistic polynomial-time adversary can output a pair $\langle c, e(g,g)^\frac{1}{s+c}\rangle$ for some $c \in \Zp$, except with probability negligible in $\lambda$.
+\end{definition}
+
+% Note: Adversary is given g^{s^i} and g^{\tau s^i} but not given \tau and outputs (c', c) s.t. c' = c^\tau. 
+% The assumption says that the only way the adversary can output such a tuple, is by setting c = {g^{s^i}}^a_i and c' = {g^{\tau s^i}}^a_i for *known* a_i's. In other words, if c \ne g^{a_i s^i}.
+\begin{definition}[$q$-PKE Assumption]
+\label{d:q-pke}
+The $q$-power knowledge of exponent assumption holds for $\mathcal{G}$ if for all probabilistic polynomial-time adversaries $A$, there exists a probabilistic polynomial time extractor $\chi_A$ such that for all \emph{benign} auxiliary inputs $z \in \{0,1\}^{\poly(\lambda)}$ 
+\begin{align*}
+\Pr \left[ \begin{array}{c}
+    \langle \Group, \GT, p, g, e\rangle \leftarrow \mathcal{G}(1^\lambda); \langle s, \tau\rangle \leftarrow \Zp^*;\\
+    \sigma \leftarrow \langle \Group, \GT, p, g, e, \mathcal{PP}_q(s, \tau)\rangle;\\
+    \langle c, \hat{c}; a_0, a_1, \dots, a_q\rangle \leftarrow (A||\chi_A)(\sigma,z):\\
+    \hat{c} = c^\tau \wedge c \ne g^{\prod_{i=0}^q {a_i s^i}}
+\end{array} \right] = \mathsf{negl}(\lambda)
+\end{align*}
+where $\langle y_1; y_2\rangle \leftarrow (A||\chi_A)(x)$ means $A$ returns $y_1$ on input $x$ and $\chi_A$ returns $y_2$ given the same input $x$ and $A$'s random tape.
+Auxiliary input $z$ is required to be drawn from a benign distribution to avoid known negative results associated with knowledge-type assumptions~\cite{neg1,neg2}.
+\end{definition}

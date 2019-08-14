@@ -1,0 +1,164 @@
+% FIXED
+%
+% Some colors:
+%  Blue: #268bd2
+%  (Grey) Blue: #657b83
+%  Green: #859900
+%  (Dark) Orange: #cb4b16
+%  Red: #dc322f
+%  Periwinkle: #6c71c4
+%  Pink: #d33682
+%  Teal: #2aa198
+%  Yellow: #b58900
+%
+\definecolor{myBlueColor}{HTML}{268BD2}
+\definecolor{myYellowColor}{HTML}{B58900}
+%\definecolor{myGreenColor}{HTML}{859900}
+\definecolor{myRedColor}{HTML}{DC322F}
+\newcommand{\myred}[1]{\textcolor{myRedColor}{#1}}
+\newcommand{\myyellow}[1]{\textcolor{myYellowColor}{#1}}
+%\newcommand{\mygreen}[1]{\textcolor{myGreenColor}{#1}}
+\newcommand{\myblue}[1]{\textcolor{myBlueColor}{#1}}
+
+%
+% Markup defs
+%
+\newcommand{\parhead}[1]{\smallskip\noindent{\bfseries\boldmath\ignorespaces{#1}}}
+%\newcommand{\heading}[1]{{\noindent\textbf{#1}}\xspace}
+\newcommand{\api}{\hangindent=\parindent \hangafter=1 \noindent}
+
+%
+% Some mathy things
+%
+\newcommand{\dom}{\mathsf{Dom}}    % domain of a function
+%\DeclareMathOperator{\Ima}{Im}     % image of a function
+%\newcommand{\vect}[1]{\mathbf{#1}} % vector
+%\newcommand{\mat}[1]{\bm{#1}}      % matrix
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+%\DeclareMathOperator*{\argmin}{argmin}
+\newcommand{\Group}{\mathbb{G}}
+\newcommand{\Fp}{\mathbb{F}_p}
+\newcommand{\GT}{\mathbb{G}_T}
+\newcommand{\Zp}{\mathbb{Z}_p}
+\newcommand{\Hb}{\mathcal{H}}                       % hash function to binary string
+\newcommand{\Hp}{\mathcal{H}_{\mathbb{F}}}          % hash function to finite field
+\newcommand{\poly}{\mathsf{poly}}
+\newcommand{\negl}{\varepsilon}
+\newcommand{\bezout}{B\'ezout\xspace}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+
+%
+% Some complexities
+%
+\newcommand{\fftinterpol}{O(n\log^2{n})}
+
+%
+% Commands for describing algorithms
+%
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newcommand{\emptyline}{\State}
+\newcommand{\AssertStateless}{\textbf{assert}\xspace}
+\newcommand{\Assert}{\State \AssertStateless}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) #1}
+
+%
+% Our AAS/AAD API
+% 
+\newcommand{\setup}{\ensuremath{\mathsf{Setup}}\xspace}
+
+\newcommand{\append}{\ensuremath{\mathsf{Append}}\xspace}
+\newcommand{\multiappend}{\append^{+}}
+
+\newcommand{\proveappendonly}{\ensuremath{\mathsf{ProveAppendOnly}}\xspace}
+\newcommand{\verappendonly}{\ensuremath{\mathsf{VerAppendOnly}}\xspace}
+
+% AAS-specific
+\newcommand{\provememb}{\ensuremath{\mathsf{ProveMemb}}\xspace}
+\newcommand{\vermemb}{\ensuremath{\mathsf{VerMemb}}\xspace}
+
+% AAD-specific
+\newcommand{\provelookup}{\ensuremath{\mathsf{ProveLookup}}\xspace}
+\newcommand{\verlookup}{\ensuremath{\mathsf{VerLookup}}\xspace}
+
+
+%
+% Algorithms
+%
+\newcommand{\verpath}{\ensuremath{\mathsf{VerPath}}\xspace}
+\newcommand{\provepath}{\ensuremath{\mathsf{ProvePath}}\xspace}
+\newcommand{\proverootaccs}{\ensuremath{\mathsf{ProveRootAccs}}\xspace}
+%\newcommand{\verrootaccs}{\ensuremath{\mathsf{VerRootAccs}}\xspace} % ended up inlining it to save space in algorithms.tex
+
+%
+% Our AT API
+%
+\newcommand{\provefrontier}{\ensuremath{\mathsf{ProveFrontier}}\xspace}
+\newcommand{\verfrontier}{\ensuremath{\mathsf{VerFrontier}}\xspace}
+\newcommand{\accumulate}{\ensuremath{\mathsf{Accum}}\xspace}
+\newcommand{\createfrontier}{\ensuremath{\mathsf{CreateFrontier}}\xspace}
+\newcommand{\buildtree}{\ensuremath{\mathsf{BuildTree}}\xspace}
+
+% 
+% Notations for trees and forests
+%
+\newcommand{\prefixes}{\ensuremath{\mathsf{prefixes}}}
+\newcommand{\parent}{\ensuremath{\mathsf{parent}}}
+\newcommand{\leaves}{\ensuremath{\mathsf{leaves}}}
+\newcommand{\bin}{\ensuremath{\mathsf{bin}}}
+\newcommand{\roots}{\ensuremath{\mathsf{roots}}}
+\newcommand{\sibling}{\ensuremath{\mathsf{sibling}}}
+\newcommand{\treepath}{\ensuremath{\mathsf{path}}}
+
+%
+% Accumulated trees and forests notation
+%
+% Global variables
+\newcommand{\elems}{\myblue{\mathbf{S}}}                     % notation for the set of elements at a certain node in the forest
+\newcommand{\hash}{\myblue{\mathbf{h}}}                      % notation for Merkle hash in the forest
+\newcommand{\acc}{\myblue{\mathbf{a}}}                       % notation for node accumulator commitment: \acc = g^{\accpoly(s)}
+\newcommand{\eacc}{\myblue{\hat{\mathbf{a}}}}                % for extractable counterpart of \eacc
+\newcommand{\subsetProof}{\myblue{\boldsymbol{\pi}}}
+\newcommand{\bft}{\myblue{\boldsymbol{\sigma}}}              % notation for frontier accumulator commitment (on the server side): \fac = g^{\fropoly(s)}
+\newcommand{\disj}{\myblue{\boldsymbol{\psi}}}               % notation for disjointness proof between a node accumulator and a frontier accumulator
+% Not global variables
+\newcommand{\charpoly}{\mathcal{C}}                 % characteristic polynomial of a set
+\newcommand{\accpoly}{\alpha}                       % notation for node accumulator polynomial
+\newcommand{\fropoly}{\phi}                         % notation for frontier accumulator 
+\newcommand{\fac}{o}                                % notation for frontier accumulator commitment (on the verifier side): \fac = g^{\fropoly(s)}
+\newcommand{\efac}{\hat{o}}                         % for extractabile counterpart of \fac
+\newcommand{\T}{\mathcal{T}}                        % notation for an authenticated accumulated tree, consisting of \accpoly and \fropoly
+\newcommand{\CP}{\chi}                              % completeness proof w.r.t. frontier accumulator
+
+%
+% Notation for AAS/AAD
+%
+\newcommand{\AS}{\mathcal{S}}       % authenticated set
+\newcommand{\AD}{\mathcal{D}}       % authenticated dictionary
+
+%
+% Markups for todo's and notes
+%
+\newcommand{\todo}[1]{\noindent\textcolor{red}{\textbf{(}\textsc{\textbf{{TODO: }}}}#1\textcolor{red}{\textbf{)}}}
+
+\mathchardef\mhyphen="2D % Hyphens in math mode: https://www.logic.at/staff/salzer/etc/mhyphen/
+\newcommand{\authnote}[2]{{\textcolor{red}{{#1: }\textcolor{blue}{ #2}}}}
+
+\newcommand{\anote}[1]{{\authnote{Alin}{#1}}}
+\newcommand{\bnote}[1]{{\authnote{Babis}{#1}}}
+\newcommand{\dnote}[1]{{\authnote{Dimitris}{#1}}}
+\newcommand{\nnote}[1]{{\authnote{Nikos}{#1}}}
+\newcommand{\snote}[1]{{\authnote{Srini}{#1}}}
+\newcommand{\vnote}[1]{{\authnote{Vivek}{#1}}}
+
+%\renewcommand{\anote}[1]{}
+%\newcommand{\bnote}[1]{}
+%\newcommand{\dnote}[1]{}
+%\newcommand{\nnote}[1]{}
+%\newcommand{\snote}[1]{}
+%\newcommand{\vnote}[1]{}

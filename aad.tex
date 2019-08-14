@@ -1,0 +1,67 @@
+% FIXED
+\section{From Sets to Dictionaries}
+\label{s:aad}
+In this section, we turn our attention to constructing an append-only authenticated dictionary (AAD).
+Recall that an AAS stores \textit{elements} and supports (non)membership queries of the form ``Is $e\in S$?''
+In contrast, an AAD stores \textit{key-value pairs} and supports \textit{lookups} of the form ``Is $V$ the complete set of values for key $k$?''
+In other words, an AAD maps a \textit{key} $k$ to a multiset of \textit{values} $V$ in an append-only fashion.
+Specifically, once a value has been added to a key, it cannot be removed nor changed.
+For example, if a key is a domain name and its values are certificates for that domain, then an AAD can be used as a Certificate Transparency (CT) log.
+In general, keys and values can have any application-specific type, as long as they can be hashed to a bit string.
+
+Our construction  has great similarities with the AAS of \cref{s:aas:construction}.
+However, the different functionality calls for modifications. 
+Indeed, even the security notion for AADs is different (see \cref{s:prelim:notation:dictionaries}).
+Specifically, in an AAS, no malicious server can simultaneously produce accepting proofs of membership and non-membership for the same element $e$ with respect to the same digest.
+In contrast, in an AAD, no malicious server can simultaneously produce accepting proofs for two different sets of values $V,V'$ for a key $k$ with respect to the same digest.
+This captures the related notion for an AAS since one of the sets of values may be empty (indicating $k$ has never been registered in the dictionary) and the other non-empty.
+Next, we describe how we modify our AAS from \cref{s:aas:construction} to get an AAD.
+
+\parhead{Encoding key-value pairs.}
+An AAS construction can trivially support key-value pairs $(k,v)$ by increasing the size of the domain of the underlying AAS from $2\lambda$ bits to $4\lambda$ bits so as to account for the value $v$. 
+That is, $(k,v)$ would be inserted in the AAS as $k|v$, using the same algorithms from \cref{s:aas:algorithms}.
+Thus AAD clients now have twice the number of public parameters: $g^\tau, (g^{s^i})_{i=0}^{4\lambda+1}$.
+
+\parhead{Proving lookups.}
+For simplicity, let us restrict ourselves to an AAD of size $2^i$ (i.e., with just \textit{one} tree-pair).
+For a key $k$ with no values, a lookup proof is simply a frontier proof for a prefix of $k$ in the BFT, much like a non-membership proof in the AAS (see \cref{s:aas:construction}).
+What if $k$ has one or more values?
+First, the lookup proof contains paths to BPT leaves with $k$'s values (i.e., with elements of the form $k|v$), much like a membership proof in an AAS.
+But what is to guarantee \textit{completeness} of the response?
+What if a malicious server leaves out one of the values of key $k$?
+(This is important in transparency logs where users look up their own PKs and must receive all of them to detect impersonation attacks.)
+We use the same frontier technique as in the AAS to convince clients values are not being left out.
+Specifically, the server proves specific prefixes for the \textit{missing values} of $k$ are not in the BPTs (and thus are not maliciously being left out).
+This is best illustrated with an example.
+
+Suppose the server wants to prove $k=0000$ has \textit{complete} set of values $V=\{v_1 = 0001, v_2 = 0011\}$.
+Consider a trie over $k|v_1$ and $k|v_2$ and note that $F^{[k]} = \{(0000|1), (0000|01), (0000|0000)$, $(0000|0010)\}$ is the set of all frontier prefixes for the missing values of $k$.
+We call this set the \textit{lower frontier} of $k$ relative to $V$.
+The key idea to prove completeness is to prove all lower frontier prefixes are in the BFT via frontier proofs (as discussed in \cref{s:aas:construction}).
+Note that $|F^{[k]}| = O(\lambda)$ and each frontier proof is $O(\log{n})$-sized, resulting in an $O(\lambda \log{n})$-sized proof.
+This idea generalizes to AADs of arbitrary size: the server (i) proves non-membership of $k$ in BPTs with no values for $k$ (via the BFT) and (ii) proves $V_i$ is the complete set of values of $k$ in each remaining BPT $i$ (via the BFT lower frontier technique).
+In that case, a lookup proof for a key $k$ with a single value $v$ consists of (1) an $O(\log{n})$-sized path in some BPT with an $O(\lambda\log{n})$-sized frontier proof in its corresponding BFT (to guarantee completeness) and (2) an $O(\log{n})$-sized frontier proof for $k$ in all other $O(\log{n})$ BFTs, to prove $k$ has no values there.
+
+\parhead{Smaller lookup proofs.}
+When $k$ has one value, it follows from above that a lookup proof for $k$ is $O(\lambda \log{n})$-sized.
+However, we can easily decrease its size to $O(\log^2{n})$.
+Note that the main overhead comes from having to prove that all $O(\lambda)$ lower frontier prefixes of $k$ are in a BFT.
+The key idea is to group all of $k$'s lower frontier prefixes into a single BFT leaf, creating an accumulator over all of them.
+As a result, instead of having to send $O(\lambda)$ frontier proofs (one for each lower frontier prefix), we send a single $O(\log{n})$-sized frontier proof for a single BFT leaf which contains all lower frontier prefixes of $k$.
+We can generalize this idea: when $k$ has $|V_i|$ values in the $i$th BFT in the forest, $k$'s lower frontier relative to $V_i$ has $O(|V_i|\lambda)$ prefixes.
+Then, for each BFT $i$, we split the lower frontier prefixes of $k$ associated with $V_i$ into separate BFT leaves each of size at most $4\lambda + 1$.
+We remind the reader that clients have enough public parameters  $(g^{s^i})_{i=0}^{4\lambda+1}$ to reconstruct the accumulators in these BFT leaves and verify the frontier proof.
+
+\parhead{Supporting large domains and multisets.}
+To handle keys and values longer than $2\lambda$ bits, we store $\mathcal{H}(k)|\mathcal{H}(v)$ in the AAD (rather than $k|v$), where $\mathcal{H}$ is a CRHF and we can retrieve the actual value $v$ from another repository.
+To support multisets (same $v$ can be inserted twice for a $k$), the server can insert $\mathcal{H}(\mathcal{H}(v)|i)$ for the $i$-th occurrence of $(k,v)$.
+% Simply inserting H(k)|H(v) does not work because if you insert (k,v) twice, and both insertions end up in the same BPT, then the frontier cannot be used to guarantee all copies of the same value $v$ have been revealed by the prover.
+% In fact, the frontier is not even used here: the prover just gives a path to one of the (k,v)'s and then uses the frontier to show that there are not other values other than v for k in this BPT.
+% The problem is that while that might be true, it does not say anything about how many times the value v occurrs in the BPT.
+
+\parhead{Supporting inclusion proofs.}
+Another useful proof for a transparency log is an \textit{inclusion proof} which only returns \textit{one of the values} of key $k$ (while lookup proofs return \textit{all} values of a key $k$).
+For example, in Certificate Transparency (CT), browsers are supposed to verify an inclusion proof of a website's certificate before using it.
+Our AAD supports inclusion proofs too.
+They consist of a path to a BPT leaf with the desired key-value pair.
+Since they do not require frontier proofs, inclusion proofs are only $O(\log{n})$-sized.

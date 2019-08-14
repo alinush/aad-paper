@@ -1,0 +1,14 @@
+% FIXED
+\section{Conclusion}
+In this work, we introduced the first append-only authenticated dictionary (AAD) that achieves polylogarithmic proof sizes and append times.
+Unlike previous work, our construction only assumes a single fully-malicious server and does not rely on users to ``collectively'' verify the dictionary.
+Our analysis shows that AADs can reduce the bandwidth in current CT logs and in CONIKS logs that publish digests much more frequently than users check their PK in the log.
+However, as our evaluation shows, AADs are not yet practical enough for deployment, particularly because they have high append times and memory usage.
+We hope future work can overcome this by optimizing the construction, the implementation or both.
+Finally, we also introduced the first efficient append-only authenticated set (AAS), which can be used to implement Google's Revocation Transparency (RT)~\cite{rev-transparency}.
+
+\parhead{Open problems.}
+We identify two interesting directions for future work.
+First, can we build efficient AADs with polylogarithmic proof sizes from standard assumptions, such as the existence of CRHFs?
+If not, what are the lower bounds?
+Second, can we obtain ``zero-knowledge'' AADs which leak nothing during queries?

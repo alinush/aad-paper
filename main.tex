@@ -1,0 +1,65 @@
+% FIXED
+\PassOptionsToPackage{hypertexnames=false}{hyperref}
+\documentclass[sigconf]{acmart}
+
+%
+% ACM-specific:
+% defining the \BibTeX command - from Oren Patashnik's original BibTeX documentation.
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08emT\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\input{includes}
+\input{defs}
+\input{ccs-footer} % ACM crap
+
+\hyphenation{mem-ber-ship}
+\hyphenation{a-sym-pto-tic}
+%\hyphenation{trans-pa-ren-cy}
+\hyphenation{non-mem-ber-ship}  % Use non\hyp{}membership in the text, or else it won't hyphenate.
+
+\settopmatter{printacmref=true}
+\begin{document}
+  \fancyhead{}
+  \input{title}
+  \input{authors}
+  %\author{Anonymous Author(s)}
+  
+  % Use the following at camera-ready time to suppress page numbers.
+  % Comment it out when you first submit the paper for review.
+  \thispagestyle{empty}
+  
+  % As a general rule, do not put math, special symbols or citations
+  % in the abstract
+  \input{abstract}
+
+  % ACM-specific
+  \input{ccs-xml}
+  %\keywords{}
+  \keywords{append-only; transparency logs; authenticated dictionaries; Merkle trees; bilinear accumulators; RSA accumulators; polynomials}
+
+  \maketitle % ACM-specific: title must be "made" after abstract
+
+  \input{intro}
+  \input{background}
+  \input{system-model}
+  \input{aas}
+  \input{aad}
+  \input{implementation}
+  \input{discussion}
+  \input{conclusion}
+
+  \input{acks}
+
+  %\clearpage
+  \bibliographystyle{ACM-Reference-Format}
+  \bibliography{references} 
+  
+  %\clearpage
+  \appendix
+  \input{assumptions}
+  \input{algorithms}
+  \input{appendix-aas-proofs}
+  \input{appendix-analysis}
+  \input{appendix-aad}
+  
+  % that's all folks
+\end{document}
