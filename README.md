@@ -11,3 +11,7 @@ All figures from the paper can be found here:
  - [An example forest evolution](https://docs.google.com/presentation/d/1_tGMZ3JcwuMdcq-EA9fWil5GxeGbeT2YG6wBgAMsKs4/edit?usp=sharing)
  - [Trie and corresponding frontier](https://docs.google.com/presentation/d/1LA_HU0lrdc-1-fg87dv6HzqB6rMF6tAWGGHWt0ZF6b8/edit?usp=sharing)
  - [Our ADS model](https://docs.google.com/presentation/d/1UG5bqioESx35o3sWT-s92FkpYQufgoyFuc6Y6tzdZQY/edit?usp=sharing)
+ 
+### Thumbnail
+ 
+A thumbnail for the paper can be found [here](https://docs.google.com/presentation/d/1HAgOpNK7-VuJm5c80A0HtQudx-RDC1f3xUAtufu8oSE/edit?usp=sharing).
