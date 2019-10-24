@@ -67,7 +67,7 @@ The internal nodes of the tree still store accumulators over the union of their 
 However, the children now have common prefixes, which will only appear once in the parent.
 For example, two children sets have the empty string $\varepsilon$ while their parent set only has $\varepsilon$ once (because of the union).
 As a result, it is no longer the case that multiplying the characteristic polynomials of the children gives us the parent's polynomial.
-Therefore, we can no longer rely on the sibling as subset proofs: we have to explicitly compute subset proofs for each child w.r.t. its parent.
+Therefore, we can no longer rely on the siblings as subset proofs: we have to explicitly compute subset proofs for each child w.r.t. its parent.
 We stress that this does not affect the asymptotic time complexity of computing the BPT.
 As before, the client starts the proof verification from the leaf, which now stores a prefix set $P(e_i)$ rather than a singleton set $\{e_i\}$.
 
