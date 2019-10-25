@@ -95,7 +95,7 @@ Verifies that $\pi_{i,j}$ correctly proves that the set with digest $d_i$ is a s
 Also, verifies that $d_i$ and $d_j$ are digests of sets at version $i$ and $j$ respectively, enforcing fork consistency.
 
 \parhead{Using the API.}
-To use an AAS scheme, first public parameters need to be computed using a call to $\setup(\cdot)$.
+To use an AAS scheme, first, public parameters need to be computed using a call to $\setup(\cdot)$.
 If the AAS scheme is trapdoored, a trusted party or MPC protocol runs $\setup(\cdot)$ and forgets the trapdoor (see \cref{s:discussion}).
 Once computed, the parameters can be reused by different servers for different append-only sets.
 $\setup(\cdot)$ also returns a \textit{public} verification key $VK$ to all clients.
