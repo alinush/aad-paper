@@ -93,7 +93,7 @@ This is best illustrated in \cref{f:accumulated-tree}a using our previous exampl
 Consider elements $d= \underline{011}1$ and $f = \underline{011}0$ that are not in $S$.
 To prove non-membership for either element, it suffices to prove the same statement: $\underline{011}\notin P(S)$.
 Thus, if we can identify all such \textit{shared prefixes}, we can use them to prove the non-membership of (exponentially) many elements.
-(This technique is also used in Micali et al's zero-knowledge sets~\cite{zks}.)
+(This technique is also used in Micali et al.'s zero-knowledge sets~\cite{zks}.)
 
 To do this, we insert all elements from $S$ in a trie as depicted in \cref{f:accumulated-tree}a.
 Next, we keep track of the prefixes at the ``frontier'' of the trie depicted in red in \cref{f:accumulated-tree}a.
