@@ -36,7 +36,7 @@ Let $\dom(f)$ be the domain of a function $f$. %(i.e. $\forall x \in \dom(f), \e
 We use $f(x)=\bot$ to indicate $x\notin \dom(f)$.
 Let $\AS_i$ denote our AAS with $i$ elements.
 Each node $w$ in the forest stores extractable accumulators $\acc_w, \eacc_w$ of its BPT together with a Merkle hash $\hash_w$.
-Internal nodes (i.e., non-roots) store a subset proof $\pi_w$ between $\acc_w$ and $\acc_{\parent(w)}$.
+Internal nodes (i.e., non-roots) store a subset proof $\subsetProof_w$ between $\acc_w$ and $\acc_{\parent(w)}$.
 The digest $d_i$ of $\AS_i$ maps each root $r$ to its Merkle hash $\hash_r$.
 Every root $r$ stores a disjointness proof $\disj_r$ between its BPT and BFT.
 For simplicity, we assume server algorithms implicitly parse out the \myblue{\textbf{bolded blue variables}} from $\AS_i$.
