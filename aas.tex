@@ -147,7 +147,7 @@ When the first element $e_1$ is appended, we build its \textit{tree-pair}: a BPT
 When the second element $e_2$ is appended, we ``merge'': we build a size-2 tree-pair over $\{e_1, e_2\}$.
 The rule is we always merge equal-sized tree-pairs.
 When $e_3$ is appended, we cannot merge it because there's no other tree-pair of size 1.
-Instead, we create a tree-pair over $\{e_1\}$.
+Instead, we create a tree-pair over $\{e_3\}$.
 In general, after $2^\ell - 1$ appends, we end up with $\ell$ separate tree-pairs corresponding to sets of elements $S_1,\dots,S_\ell$.
 The final set is $S=\bigcup_{j=1}^{\ell} S_j$ where $|S_j| = 2^j$.
 The evolution of such a forest is depicted in \cref{f:forest} and the final data structure can be seen in \cref{f:accaas}.
